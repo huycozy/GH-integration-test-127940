@@ -1,0 +1,27 @@
+name: release
+
+on:
+  push:
+    branches:
+      - "dev"
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v2
+
+      - name: 🔨 Show Build Version
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          git-message: 'chore(release): {version}'
+          version-file: './pubspec.yaml'
+          version-path: 'version'
+      
+      - name: Show version
+        run: |
+          echo "version is ${{ steps.changelog.outputs.version }}"
+          echo "tag is ${{ steps.changelog.outputs.tag }}"

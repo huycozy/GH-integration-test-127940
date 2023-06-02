@@ -1,0 +1,20 @@
+workflows:
+    web-workflow:
+      name: Web Integration Testing
+      instance_type: mac_mini_m1
+      max_build_duration: 120
+      # triggering:
+      #   events:
+      #     - push
+      #   branch_patterns:
+      #     - pattern: '*'
+      #       include: true
+      #       source: true
+      #   cancel_previous_builds: false
+      scripts:
+        - name: Run integration test
+          script: | 
+            sudo safaridriver --enable
+            safaridriver --port 4444 &
+            flutter config --enable-web
+            flutter drive --driver=test_driver/integration_test.dart --target=e2e/home_scenario.dart -d web-server --release --browser-name safari

@@ -1,0 +1,64 @@
+name: e2e Testing
+on: [workflow_dispatch]
+run-name: e2e Test by @${{ github.actor }}
+jobs:
+  drive:
+    runs-on: macos-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # - name: Install Chrome Browser
+      #   uses: browser-actions/setup-chrome@v1
+      #   with:
+      #     chrome-version: stable
+      #   id: setup-chrome
+        
+      # - name: Check Browser version
+      #   run: |
+      #     echo Installed chromium version: ${{ steps.setup-chrome.outputs.chrome-version }}
+      #     ${{ steps.setup-chrome.outputs.chrome-path }} --version
+
+      # - name: 🌐 Install Chromedriver
+      #   uses: nanasess/setup-chromedriver@v2
+      #   with:
+      #     chromedriver-version: '114.0.5735.16'
+
+      # - name: ⏳ Delay
+      #   run: |
+      #     echo "Waiting for Chromedriver to start..."
+      #     sleep 20
+
+      # - name: 🪛 Start Chromedriver
+      #   run: |
+      #     export DISPLAY=:99
+      #     chromedriver --url-base=/wd/hub --port=4444 &
+      #     sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+
+      # - name: 📢 Check Chromedriver Version
+      #   run: chromedriver -v
+
+      # - name: ⏳ Delay
+      #   run: |
+      #     echo "Waiting for Chromedriver to start..."
+      #     sleep 15
+
+      # - name: 🌐 Check Chromedriver Port
+      #   run: |
+      #     lsof -i :4444
+
+      # - name: Flutter Doctor
+      #   run: flutter doctor -v
+
+      - name: 🚀 Run Integration Test
+        run: |
+          sudo safaridriver --enable
+          safaridriver --port 4444 &
+          flutter config --enable-web
+          flutter drive --driver=test_driver/integration_test.dart --target=e2e/home_scenario.dart -d web-server --profile --browser-name=safari

@@ -1,0 +1,69 @@
+name: beta_push
+
+on: 
+  push:
+    branches:
+      - "beta"
+    paths:
+      - "**.dart"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v2
+      
+      - name: 🍵 Install Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 🔨 Build APK
+        run: flutter build apk --split-per-abi
+
+      - name: 💾 Save APK
+        uses: actions/upload-artifact@v3
+        with: 
+          name: beta-apk
+          path: build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk
+          retention-days: 7
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 💎 Install Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7'
+
+      - name: 🔥 Install Firebase CLI
+        uses: w9jds/firebase-action@master
+
+      - name: 📱 Install Android Gems
+        working-directory: ${{ github.workspace }}/android
+        run: bundle install  
+
+      - name: 📦 Download APK
+        uses: actions/download-artifact@master
+        with:
+          name: beta-apk
+          path: build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk
+      
+      - name: 🚀 Distribute Android Beta App
+        working-directory: build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk
+        run: bundle exec fastlane distribute_android_app
+        env:
+          FIREBASE_CLI_TOKEN: ${{ secrets.FIREBASE_CLI_TOKEN }}
+          FIREBASE_APP_ID_ANDROID: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          ANDROID_TESTERS: ${{ secrets.ANDROID_TESTERS }}
+
+      

@@ -1,0 +1,42 @@
+name: beta_pr
+
+on:
+  pull_request:
+    branches:
+      - "beta"
+    paths:
+      - "**.dart"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v2
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install Dependencies
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+
+      - name: ✨ Check Formatting
+        run: melos check_format
+
+      - name: 🛑 Analyze
+        run: melos analyze
+
+      - name: 🧪 Run Tests
+        run: melos run test
+
+      - name: 📊 Check Code Coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v1
+        with:
+          path: ./coverage/lcov.info
+          exclude: '*.g.dart *.freezed.dart'
+          min_coverage: 50
