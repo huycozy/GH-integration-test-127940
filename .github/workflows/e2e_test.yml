@@ -11,7 +11,7 @@ jobs:
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: 'master'
           cache: true
 
       - name: Install Chrome Browser
